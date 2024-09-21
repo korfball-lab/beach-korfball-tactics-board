@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Korfball Tactical Board</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="beachKorfballBoard"></canvas>
+    <script>
+        const canvas = document.getElementById('beachKorfballBoard');
+        const ctx = canvas.getContext('2d');
+
+        const COURT_WIDTH = 20; // meters
+        const COURT_LENGTH = 10; // meters
+        const BORDER_WIDTH = 2; // meters
+
+        let scale;
+        let players = [];
+        let ball = { position: [0, 0], color: '#FFA500', radius: 0.2 };
+        let selectedObject = null;
+        let offset = { x: 0, y: 0 };
+        let isDragging = false;
+
+        function resizeCanvas() {
+            const totalWidth = COURT_WIDTH + 2 * BORDER_WIDTH;
+            const totalHeight = COURT_LENGTH + 2 * BORDER_WIDTH;
+            const aspectRatio = totalWidth / totalHeight;
+
+            if (window.innerWidth / window.innerHeight > aspectRatio) {
+                canvas.height = window.innerHeight;
+                canvas.width = canvas.height * aspectRatio;
+            } else {
+                canvas.width = window.innerWidth;
+                canvas.height = canvas.width / aspectRatio;
+            }
+
+            scale = canvas.width / totalWidth;
+            initializePlayers();
+            drawBoard();
+        }
+
+        function initializePlayers() {
+            const courtStartX = BORDER_WIDTH * scale;
+            const courtStartY = BORDER_WIDTH * scale;
+            const courtWidthPx = COURT_WIDTH * scale;
+            const courtLengthPx = COURT_LENGTH * scale;
+
+            players = [
+                // Team A (Red)
+                {position: [courtStartX + courtWidthPx * 0.2, courtStartY + courtLengthPx * 0.3], color: 'red', number: '1', gender: 'boy'},
+                {position: [courtStartX + courtWidthPx * 0.4, courtStartY + courtLengthPx * 0.2], color: 'red', number: '2', gender: 'boy'},
+                {position: [courtStartX + courtWidthPx * 0.3, courtStartY + courtLengthPx * 0.5], color: 'red', number: '3', gender: 'girl'},
+                {position: [courtStartX + courtWidthPx * 0.1, courtStartY + courtLengthPx * 0.4], color: 'red', number: '4', gender: 'girl'},
+                // Team B (Blue)
+                {position: [courtStartX + courtWidthPx * 0.8, courtStartY + courtLengthPx * 0.3], color: 'blue', number: '5', gender: 'boy'},
+                {position: [courtStartX + courtWidthPx * 0.6, courtStartY + courtLengthPx * 0.2], color: 'blue', number: '6', gender: 'boy'},
+                {position: [courtStartX + courtWidthPx * 0.7, courtStartY + courtLengthPx * 0.5], color: 'blue', number: '7', gender: 'girl'},
+                {position: [courtStartX + courtWidthPx * 0.9, courtStartY + courtLengthPx * 0.4], color: 'blue', number: '8', gender: 'girl'},
+            ];
+            ball.position = [courtStartX + courtWidthPx * 0.5, courtStartY + courtLengthPx * 0.5];
+        }
+
+        function drawCourt() {
+            const courtStartX = BORDER_WIDTH * scale;
+            const courtStartY = BORDER_WIDTH * scale;
+            const courtWidthPx = COURT_WIDTH * scale;
+            const courtLengthPx = COURT_LENGTH * scale;
+
+            // Border area
+            ctx.fillStyle = '#87CEEB'; // Sky blue for border
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Main court
+            ctx.fillStyle = '#F0E68C'; // Khaki for sand
+            ctx.fillRect(courtStartX, courtStartY, courtWidthPx, courtLengthPx);
+
+            // Boundary lines
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(courtStartX, courtStartY, courtWidthPx, courtLengthPx);
+
+            // 2-point virtual line
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(courtStartX + courtWidthPx / 2, courtStartY);
+            ctx.lineTo(courtStartX + courtWidthPx / 2, courtStartY + courtLengthPx);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Free shot lines
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(courtStartX + 7 * scale, courtStartY);
+            ctx.lineTo(courtStartX + 7 * scale, courtStartY + courtLengthPx);
+            ctx.moveTo(courtStartX + courtWidthPx - 7 * scale, courtStartY);
+            ctx.lineTo(courtStartX + courtWidthPx - 7 * scale, courtStartY + courtLengthPx);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 2-point corners
+            ctx.beginPath();
+            ctx.moveTo(courtStartX, courtStartY + 3 * scale);
+            ctx.lineTo(courtStartX + 3 * scale, courtStartY);
+            ctx.moveTo(courtStartX + courtWidthPx, courtStartY + 3 * scale);
+            ctx.lineTo(courtStartX + courtWidthPx - 3 * scale, courtStartY);
+            ctx.moveTo(courtStartX, courtStartY + courtLengthPx - 3 * scale);
+            ctx.lineTo(courtStartX + 3 * scale, courtStartY + courtLengthPx);
+            ctx.moveTo(courtStartX + courtWidthPx, courtStartY + courtLengthPx - 3 * scale);
+            ctx.lineTo(courtStartX + courtWidthPx - 3 * scale, courtStartY + courtLengthPx);
+            ctx.stroke();
+
+            // Korfs
+            drawKorf(courtStartX + 4 * scale, courtStartY + courtLengthPx / 2);
+            drawKorf(courtStartX + courtWidthPx - 4 * scale, courtStartY + courtLengthPx / 2);
+        }
+
+        function drawKorf(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.2 * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+        }
+
+        function drawPlayer(player) {
+            const {position, color, number, gender} = player;
+            const playerSize = 0.3 * scale;
+            ctx.fillStyle = color;
+            ctx.strokeStyle = 'black';
+            if (gender === 'boy') {
+                ctx.beginPath();
+                ctx.arc(position[0], position[1], playerSize, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(position[0], position[1] - playerSize);
+                ctx.lineTo(position[0] - playerSize, position[1] + playerSize);
+                ctx.lineTo(position[0] + playerSize, position[1] + playerSize);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.fillStyle = 'white';
+            ctx.font = `${playerSize}px Arial`;
+            ctx.fillText(number, position[0] - playerSize / 3, position[1] + playerSize / 3);
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.position[0], ball.position[1], ball.radius * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCourt();
+            players.forEach(drawPlayer);
+            drawBall();
+        }
+
+        function isPointInPlayer(mousePosition, player) {
+            const {position, gender} = player;
+            const touchRadius = 0.3 * scale;
+            if (gender === 'boy') {
+                const dist = Math.sqrt(Math.pow(mousePosition.x - position[0], 2) + Math.pow(mousePosition.y - position[1], 2));
+                return dist <= touchRadius;
+            } else {
+                const inside = (mousePosition.y < position[1] + touchRadius && mousePosition.y > position[1] - touchRadius &&
+                               mousePosition.x > position[0] - touchRadius && mousePosition.x < position[0] + touchRadius);
+                return inside;
+            }
+        }
+
+        function isPointInBall(mousePosition) {
+            const dist = Math.sqrt(Math.pow(mousePosition.x - ball.position[0], 2) + Math.pow(mousePosition.y - ball.position[1], 2));
+            return dist <= ball.radius * scale;
+        }
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function startDragging(event) {
+            const mousePosition = getMousePos(canvas, event);
+            if (isPointInBall(mousePosition)) {
+                selectedObject = ball;
+                isDragging = true;
+                offset.x = mousePosition.x - ball.position[0];
+                offset.y = mousePosition.y - ball.position[1];
+            } else {
+                for (const player of players) {
+                    if (isPointInPlayer(mousePosition, player)) {
+                        selectedObject = player;
+                        isDragging = true;
+                        offset.x = mousePosition.x - player.position[0];
+                        offset.y = mousePosition.y - player.position[1];
+                        break;
+                    }
+                }
+            }
+        }
+
+        function drag(event) {
+            if (isDragging && selectedObject) {
+                const mousePosition = getMousePos(canvas, event);
+                selectedObject.position[0] = mousePosition.x - offset.x;
+                selectedObject.position[1] = mousePosition.y - offset.y;
+                drawBoard();
+            }
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            selectedObject = null;
+        }
+
+        function handleTouch(eventHandler) {
+            return function(event) {
+                event.preventDefault();
+                const touch = event.changedTouches[0];
+                const mouseEvent = new MouseEvent(eventHandler.name, {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                eventHandler(mouseEvent);
+            };
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        canvas.addEventListener('mousedown', startDragging);
+        canvas.addEventListener('mousemove', drag);
+        canvas.addEventListener('mouseup', stopDragging);
+        canvas.addEventListener('mouseleave', stopDragging);
+        canvas.addEventListener('touchstart', handleTouch(startDragging));
+        canvas.addEventListener('touchmove', handleTouch(drag));
+        canvas.addEventListener('touchend', handleTouch(stopDragging));
+        canvas.addEventListener('touchcancel', handleTouch(stopDragging));
+
+        resizeCanvas();
+        initializePlayers();
+        drawBoard();
+    </script>
+</body>
+</html>
