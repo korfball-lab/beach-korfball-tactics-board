@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビーチコーフボール戦略ボード</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 0 10px;
+            border-right: 1px solid #ddd;
+        }
+
+        .tool-group:last-child {
+            border-right: none;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #f0f2f5;
+            color: #333;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background: #e4e6eb;
+            transform: translateY(-1px);
+        }
+
+        .btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #e5e7eb;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .canvas-wrapper {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            cursor: crosshair;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        /* Frame Controls */
+        .frame-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .frame-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .frame-item {
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .frame-item:hover {
+            background: #f3f4f6;
+        }
+
+        .frame-item.active {
+            background: #ddd6fe;
+            border-left: 3px solid #667eea;
+        }
+
+        .frame-delete {
+            color: #ef4444;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .frame-delete:hover {
+            background: #fee2e2;
+        }
+
+        /* Players Panel */
+        .players-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .team-section {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .team-section h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            background: white;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .player-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .player-icon.circle {
+            border-radius: 50%;
+        }
+
+        .player-icon.triangle {
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid;
+            position: relative;
+        }
+
+        /* Color Picker */
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #6b7280;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            min-height: 200px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .toolbar {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏐 ビーチコーフボール戦略ボード</h1>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="tool-group">
+                <button class="btn active" data-tool="select" title="選択・移動">
+                    🖱️ 選択
+                </button>
+                <button class="btn" data-tool="arrow" title="矢印を描く">
+                    ➡️ 矢印
+                </button>
+                <button class="btn" data-tool="line" title="線を描く">
+                    📏 線
+                </button>
+                <button class="btn" data-tool="circle" title="円を描く">
+                    ⭕ 円
+                </button>
+                <button class="btn" data-tool="freehand" title="フリーハンド">
+                    ✏️ 描画
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <div class="color-picker">
+                    <div class="color-option active" data-color="#000000" style="background: #000000;" title="黒"></div>
+                    <div class="color-option" data-color="#ef4444" style="background: #ef4444;" title="赤"></div>
+                    <div class="color-option" data-color="#3b82f6" style="background: #3b82f6;" title="青"></div>
+                    <div class="color-option" data-color="#10b981" style="background: #10b981;" title="緑"></div>
+                    <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;" title="オレンジ"></div>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <button class="btn" id="undoBtn" title="元に戻す">↩️</button>
+                <button class="btn" id="redoBtn" title="やり直し">↪️</button>
+                <button class="btn" id="clearDrawingBtn" title="描画をクリア">🗑️ 描画</button>
+                <button class="btn btn-danger" id="resetBtn" title="全てリセット">🔄 リセット</button>
+            </div>
+
+            <div class="tool-group">
+                <button class="btn btn-primary" id="saveBtn">💾 保存</button>
+                <button class="btn btn-primary" id="loadBtn">📂 読込</button>
+                <button class="btn btn-primary" id="exportBtn">📸 PNG出力</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-wrapper">
+                    <canvas id="beachKorfballBoard"></canvas>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Frames Section -->
+                <div class="sidebar-section">
+                    <h3>📋 フレーム管理</h3>
+                    <div class="frame-controls">
+                        <button class="btn btn-primary" id="addFrameBtn" style="flex: 1;">+ 追加</button>
+                        <button class="btn" id="prevFrameBtn">◀</button>
+                        <button class="btn" id="nextFrameBtn">▶</button>
+                    </div>
+                    <div class="frame-list" id="frameList"></div>
+                </div>
+
+                <!-- Players Section -->
+                <div class="sidebar-section">
+                    <h3>👥 プレイヤー</h3>
+                    <div class="players-panel">
+                        <div class="team-section">
+                            <h4 style="color: #ef4444;">チームA（赤）</h4>
+                            <div class="player-list" id="teamAPlayers"></div>
+                        </div>
+                        <div class="team-section">
+                            <h4 style="color: #3b82f6;">チームB（青）</h4>
+                            <div class="player-list" id="teamBPlayers"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <div class="modal-header">プレイを保存</div>
+            <div class="input-group">
+                <label>プレイ名</label>
+                <input type="text" id="playName" placeholder="例: オフェンス1">
+            </div>
+            <div class="input-group">
+                <label>データ（自動生成）</label>
+                <textarea id="saveData" readonly></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="closeSaveModal">キャンセル</button>
+                <button class="btn btn-primary" id="copyDataBtn">コピー</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Modal -->
+    <div class="modal" id="loadModal">
+        <div class="modal-content">
+            <div class="modal-header">プレイを読み込み</div>
+            <div class="input-group">
+                <label>データを貼り付け</label>
+                <textarea id="loadData" placeholder="保存したJSONデータを貼り付けてください"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="closeLoadModal">キャンセル</button>
+                <button class="btn btn-primary" id="loadDataBtn">読み込み</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const COURT_WIDTH = 20; // meters
+        const COURT_LENGTH = 10; // meters
+        const BORDER_WIDTH = 2; // meters
+        const PLAYER_RADIUS = 0.3; // meters
+
+        // Canvas setup
+        const canvas = document.getElementById('beachKorfballBoard');
+        const ctx = canvas.getContext('2d');
+        let scale;
+
+        // State
+        let currentTool = 'select';
+        let currentColor = '#000000';
+        let frames = [];
+        let currentFrameIndex = 0;
+        let selectedObject = null;
+        let isDragging = false;
+        let offset = { x: 0, y: 0 };
+        let drawingStart = null;
+        let tempDrawing = null;
+        let history = [];
+        let historyIndex = -1;
+
+        // Initialize first frame
+        function createNewFrame() {
+            const courtStartX = BORDER_WIDTH;
+            const courtStartY = BORDER_WIDTH;
+            const courtWidth = COURT_WIDTH;
+            const courtLength = COURT_LENGTH;
+
+            return {
+                players: [
+                    // Team A - On Court
+                    {position: [courtStartX + courtWidth * 0.2, courtStartY + courtLength * 0.3], color: '#ef4444', number: '1', gender: 'boy', onCourt: true, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.4, courtStartY + courtLength * 0.2], color: '#ef4444', number: '2', gender: 'boy', onCourt: true, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.3, courtStartY + courtLength * 0.5], color: '#ef4444', number: '3', gender: 'girl', onCourt: true, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.1, courtStartY + courtLength * 0.4], color: '#ef4444', number: '4', gender: 'girl', onCourt: true, team: 'A'},
+                    // Team A - Substitutes
+                    {position: [courtStartX + courtWidth * 0.15, courtStartY - 1.2], color: '#ef4444', number: '5', gender: 'boy', onCourt: false, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.25, courtStartY - 1.2], color: '#ef4444', number: '6', gender: 'boy', onCourt: false, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.35, courtStartY - 1.2], color: '#ef4444', number: '7', gender: 'girl', onCourt: false, team: 'A'},
+                    {position: [courtStartX + courtWidth * 0.45, courtStartY - 1.2], color: '#ef4444', number: '8', gender: 'girl', onCourt: false, team: 'A'},
+                    // Team B - On Court
+                    {position: [courtStartX + courtWidth * 0.8, courtStartY + courtLength * 0.3], color: '#3b82f6', number: '1', gender: 'boy', onCourt: true, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.6, courtStartY + courtLength * 0.2], color: '#3b82f6', number: '2', gender: 'boy', onCourt: true, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.7, courtStartY + courtLength * 0.5], color: '#3b82f6', number: '3', gender: 'girl', onCourt: true, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.9, courtStartY + courtLength * 0.4], color: '#3b82f6', number: '4', gender: 'girl', onCourt: true, team: 'B'},
+                    // Team B - Substitutes
+                    {position: [courtStartX + courtWidth * 0.55, courtStartY + courtLength + 1.2], color: '#3b82f6', number: '5', gender: 'boy', onCourt: false, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.65, courtStartY + courtLength + 1.2], color: '#3b82f6', number: '6', gender: 'boy', onCourt: false, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.75, courtStartY + courtLength + 1.2], color: '#3b82f6', number: '7', gender: 'girl', onCourt: false, team: 'B'},
+                    {position: [courtStartX + courtWidth * 0.85, courtStartY + courtLength + 1.2], color: '#3b82f6', number: '8', gender: 'girl', onCourt: false, team: 'B'},
+                ],
+                ball: { position: [courtStartX + courtWidth * 0.5, courtStartY + courtLength * 0.5], color: '#f59e0b', radius: 0.2 },
+                drawings: []
+            };
+        }
+
+        frames.push(createNewFrame());
+
+        // Resize canvas
+        function resizeCanvas() {
+            const totalWidth = COURT_WIDTH + 2 * BORDER_WIDTH;
+            const totalHeight = COURT_LENGTH + 2 * BORDER_WIDTH + 3; // Extra space for substitutes
+            const aspectRatio = totalWidth / totalHeight;
+
+            const maxWidth = window.innerWidth - 320; // Account for sidebar
+            const maxHeight = window.innerHeight - 200; // Account for header and toolbar
+
+            if (maxWidth / maxHeight > aspectRatio) {
+                canvas.height = maxHeight;
+                canvas.width = canvas.height * aspectRatio;
+            } else {
+                canvas.width = maxWidth;
+                canvas.height = canvas.width / aspectRatio;
+            }
+
+            scale = canvas.width / totalWidth;
+            draw();
+        }
+
+        // Drawing functions
+        function drawCourt() {
+            const courtStartX = BORDER_WIDTH * scale;
+            const courtStartY = BORDER_WIDTH * scale;
+            const courtWidthPx = COURT_WIDTH * scale;
+            const courtLengthPx = COURT_LENGTH * scale;
+
+            // Border area
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Substitute areas labels
+            ctx.fillStyle = '#666';
+            ctx.font = `${12}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('チームA 交代選手', courtStartX + courtWidthPx * 0.3, (BORDER_WIDTH - 0.3) * scale);
+            ctx.fillText('チームB 交代選手', courtStartX + courtWidthPx * 0.7, (BORDER_WIDTH + COURT_LENGTH + 0.8) * scale);
+
+            // Main court
+            ctx.fillStyle = '#F0E68C';
+            ctx.fillRect(courtStartX, courtStartY, courtWidthPx, courtLengthPx);
+
+            // Boundary lines
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(courtStartX, courtStartY, courtWidthPx, courtLengthPx);
+
+            // 2-point virtual line
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(courtStartX + courtWidthPx / 2, courtStartY);
+            ctx.lineTo(courtStartX + courtWidthPx / 2, courtStartY + courtLengthPx);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Free shot lines
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(courtStartX + 7 * scale, courtStartY);
+            ctx.lineTo(courtStartX + 7 * scale, courtStartY + courtLengthPx);
+            ctx.moveTo(courtStartX + courtWidthPx - 7 * scale, courtStartY);
+            ctx.lineTo(courtStartX + courtWidthPx - 7 * scale, courtStartY + courtLengthPx);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 2-point corners
+            ctx.beginPath();
+            ctx.moveTo(courtStartX, courtStartY + 3 * scale);
+            ctx.lineTo(courtStartX + 3 * scale, courtStartY);
+            ctx.moveTo(courtStartX + courtWidthPx, courtStartY + 3 * scale);
+            ctx.lineTo(courtStartX + courtWidthPx - 3 * scale, courtStartY);
+            ctx.moveTo(courtStartX, courtStartY + courtLengthPx - 3 * scale);
+            ctx.lineTo(courtStartX + 3 * scale, courtStartY + courtLengthPx);
+            ctx.moveTo(courtStartX + courtWidthPx, courtStartY + courtLengthPx - 3 * scale);
+            ctx.lineTo(courtStartX + courtWidthPx - 3 * scale, courtStartY + courtLengthPx);
+            ctx.stroke();
+
+            // Korfs
+            drawKorf(courtStartX + 4 * scale, courtStartY + courtLengthPx / 2);
+            drawKorf(courtStartX + courtWidthPx - 4 * scale, courtStartY + courtLengthPx / 2);
+        }
+
+        function drawKorf(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.2 * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawPlayer(player) {
+            const {position, color, number, gender, onCourt} = player;
+            const x = position[0] * scale;
+            const y = position[1] * scale;
+            const playerSize = PLAYER_RADIUS * scale;
+            
+            // Semi-transparent if not on court
+            const alpha = onCourt ? 1.0 : 0.6;
+            ctx.globalAlpha = alpha;
+
+            ctx.fillStyle = color;
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+
+            if (gender === 'boy') {
+                ctx.beginPath();
+                ctx.arc(x, y, playerSize, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(x, y - playerSize);
+                ctx.lineTo(x - playerSize, y + playerSize);
+                ctx.lineTo(x + playerSize, y + playerSize);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${playerSize * 0.8}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(number, x, y);
+
+            ctx.globalAlpha = 1.0;
+        }
+
+        function drawBall() {
+            const frame = frames[currentFrameIndex];
+            const x = frame.ball.position[0] * scale;
+            const y = frame.ball.position[1] * scale;
+            const radius = frame.ball.radius * scale;
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = frame.ball.color;
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawArrow(from, to, color) {
+            const headLength = 15;
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(from.x, from.y);
+            ctx.lineTo(to.x, to.y);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(to.x, to.y);
+            ctx.lineTo(to.x - headLength * Math.cos(angle - Math.PI / 6), to.y - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(to.x - headLength * Math.cos(angle + Math.PI / 6), to.y - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawLine(from, to, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(from.x, from.y);
+            ctx.lineTo(to.x, to.y);
+            ctx.stroke();
+        }
+
+        function drawCircle(center, radius, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        function drawFreehand(points, color) {
+            if (points.length < 2) return;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+        }
+
+        function drawDrawings() {
+            const frame = frames[currentFrameIndex];
+            frame.drawings.forEach(drawing => {
+                switch (drawing.type) {
+                    case 'arrow':
+                        drawArrow(drawing.from, drawing.to, drawing.color);
+                        break;
+                    case 'line':
+                        drawLine(drawing.from, drawing.to, drawing.color);
+                        break;
+                    case 'circle':
+                        drawCircle(drawing.center, drawing.radius, drawing.color);
+                        break;
+                    case 'freehand':
+                        drawFreehand(drawing.points, drawing.color);
+                        break;
+                }
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCourt();
+            
+            const frame = frames[currentFrameIndex];
+            frame.players.forEach(drawPlayer);
+            drawBall();
+            drawDrawings();
+
+            // Draw temp drawing
+            if (tempDrawing) {
+                switch (currentTool) {
+                    case 'arrow':
+                        drawArrow(tempDrawing.from, tempDrawing.to, currentColor);
+                        break;
+                    case 'line':
+                        drawLine(tempDrawing.from, tempDrawing.to, currentColor);
+                        break;
+                    case 'circle':
+                        const radius = Math.sqrt(
+                            Math.pow(tempDrawing.to.x - tempDrawing.from.x, 2) +
+                            Math.pow(tempDrawing.to.y - tempDrawing.from.y, 2)
+                        );
+                        drawCircle(tempDrawing.from, radius, currentColor);
+                        break;
+                    case 'freehand':
+                        drawFreehand(tempDrawing.points, currentColor);
+                        break;
+                }
+            }
+        }
+
+        // Mouse/Touch helpers
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function isPointInPlayer(pos, player) {
+            const px = player.position[0] * scale;
+            const py = player.position[1] * scale;
+            const touchRadius = PLAYER_RADIUS * scale;
+            const dist = Math.sqrt(Math.pow(pos.x - px, 2) + Math.pow(pos.y - py, 2));
+            return dist <= touchRadius * 1.2;
+        }
+
+        function isPointInBall(pos) {
+            const frame = frames[currentFrameIndex];
+            const bx = frame.ball.position[0] * scale;
+            const by = frame.ball.position[1] * scale;
+            const br = frame.ball.radius * scale;
+            const dist = Math.sqrt(Math.pow(pos.x - bx, 2) + Math.pow(pos.y - by, 2));
+            return dist <= br * 1.5;
+        }
+
+        // Event handlers
+        function handleMouseDown(evt) {
+            const pos = getMousePos(evt);
+            const frame = frames[currentFrameIndex];
+
+            if (currentTool === 'select') {
+                // Check ball first
+                if (isPointInBall(pos)) {
+                    selectedObject = frame.ball;
+                    isDragging = true;
+                    offset.x = pos.x - frame.ball.position[0] * scale;
+                    offset.y = pos.y - frame.ball.position[1] * scale;
+                    return;
+                }
+
+                // Check players
+                for (const player of frame.players) {
+                    if (isPointInPlayer(pos, player)) {
+                        selectedObject = player;
+                        isDragging = true;
+                        offset.x = pos.x - player.position[0] * scale;
+                        offset.y = pos.y - player.position[1] * scale;
+                        return;
+                    }
+                }
+            } else if (['arrow', 'line', 'circle'].includes(currentTool)) {
+                drawingStart = pos;
+                tempDrawing = { from: pos, to: pos };
+            } else if (currentTool === 'freehand') {
+                drawingStart = pos;
+                tempDrawing = { points: [pos] };
+            }
+        }
+
+        function handleMouseMove(evt) {
+            const pos = getMousePos(evt);
+            const frame = frames[currentFrameIndex];
+
+            if (currentTool === 'select' && isDragging && selectedObject) {
+                selectedObject.position[0] = (pos.x - offset.x) / scale;
+                selectedObject.position[1] = (pos.y - offset.y) / scale;
+                draw();
+            } else if (tempDrawing) {
+                if (['arrow', 'line', 'circle'].includes(currentTool)) {
+                    tempDrawing.to = pos;
+                } else if (currentTool === 'freehand') {
+                    tempDrawing.points.push(pos);
+                }
+                draw();
+            }
+        }
+
+        function handleMouseUp(evt) {
+            const frame = frames[currentFrameIndex];
+
+            if (currentTool === 'select') {
+                if (isDragging) {
+                    saveToHistory();
+                }
+                isDragging = false;
+                selectedObject = null;
+            } else if (tempDrawing && drawingStart) {
+                const pos = getMousePos(evt);
+                
+                if (currentTool === 'arrow') {
+                    frame.drawings.push({
+                        type: 'arrow',
+                        from: drawingStart,
+                        to: pos,
+                        color: currentColor
+                    });
+                } else if (currentTool === 'line') {
+                    frame.drawings.push({
+                        type: 'line',
+                        from: drawingStart,
+                        to: pos,
+                        color: currentColor
+                    });
+                } else if (currentTool === 'circle') {
+                    const radius = Math.sqrt(
+                        Math.pow(pos.x - drawingStart.x, 2) +
+                        Math.pow(pos.y - drawingStart.y, 2)
+                    );
+                    frame.drawings.push({
+                        type: 'circle',
+                        center: drawingStart,
+                        radius: radius,
+                        color: currentColor
+                    });
+                } else if (currentTool === 'freehand') {
+                    frame.drawings.push({
+                        type: 'freehand',
+                        points: tempDrawing.points,
+                        color: currentColor
+                    });
+                }
+
+                saveToHistory();
+                tempDrawing = null;
+                drawingStart = null;
+                draw();
+            }
+        }
+
+        // Tool selection
+        document.querySelectorAll('[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+                canvas.style.cursor = currentTool === 'select' ? 'default' : 'crosshair';
+            });
+        });
+
+        // Color selection
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                currentColor = opt.dataset.color;
+            });
+        });
+
+        // Frame management
+        function updateFrameList() {
+            const list = document.getElementById('frameList');
+            list.innerHTML = '';
+            frames.forEach((frame, index) => {
+                const item = document.createElement('div');
+                item.className = 'frame-item' + (index === currentFrameIndex ? ' active' : '');
+                item.innerHTML = `
+                    <span>フレーム ${index + 1}</span>
+                    ${frames.length > 1 ? `<span class="frame-delete" data-index="${index}">×</span>` : ''}
+                `;
+                item.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('frame-delete')) {
+                        currentFrameIndex = index;
+                        updateFrameList();
+                        draw();
+                    }
+                });
+                list.appendChild(item);
+            });
+
+            // Delete handlers
+            document.querySelectorAll('.frame-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(btn.dataset.index);
+                    if (frames.length > 1) {
+                        frames.splice(index, 1);
+                        if (currentFrameIndex >= frames.length) {
+                            currentFrameIndex = frames.length - 1;
+                        }
+                        updateFrameList();
+                        draw();
+                    }
+                });
+            });
+        }
+
+        document.getElementById('addFrameBtn').addEventListener('click', () => {
+            // Clone current frame
+            const currentFrame = frames[currentFrameIndex];
+            const newFrame = JSON.parse(JSON.stringify(currentFrame));
+            frames.push(newFrame);
+            currentFrameIndex = frames.length - 1;
+            updateFrameList();
+            draw();
+        });
+
+        document.getElementById('prevFrameBtn').addEventListener('click', () => {
+            if (currentFrameIndex > 0) {
+                currentFrameIndex--;
+                updateFrameList();
+                draw();
+            }
+        });
+
+        document.getElementById('nextFrameBtn').addEventListener('click', () => {
+            if (currentFrameIndex < frames.length - 1) {
+                currentFrameIndex++;
+                updateFrameList();
+                draw();
+            }
+        });
+
+        // History management
+        function saveToHistory() {
+            const state = JSON.parse(JSON.stringify(frames));
+            history = history.slice(0, historyIndex + 1);
+            history.push(state);
+            historyIndex++;
+            if (history.length > 50) {
+                history.shift();
+                historyIndex--;
+            }
+        }
+
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                frames = JSON.parse(JSON.stringify(history[historyIndex]));
+                draw();
+            }
+        });
+
+        document.getElementById('redoBtn').addEventListener('click', () => {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                frames = JSON.parse(JSON.stringify(history[historyIndex]));
+                draw();
+            }
+        });
+
+        // Clear and reset
+        document.getElementById('clearDrawingBtn').addEventListener('click', () => {
+            if (confirm('現在のフレームの描画を全て削除しますか？')) {
+                frames[currentFrameIndex].drawings = [];
+                saveToHistory();
+                draw();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('全てをリセットしますか？この操作は取り消せません。')) {
+                frames = [createNewFrame()];
+                currentFrameIndex = 0;
+                history = [];
+                historyIndex = -1;
+                updateFrameList();
+                draw();
+            }
+        });
+
+        // Save/Load
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const data = JSON.stringify(frames, null, 2);
+            document.getElementById('saveData').value = data;
+            document.getElementById('saveModal').classList.add('active');
+        });
+
+        document.getElementById('closeSaveModal').addEventListener('click', () => {
+            document.getElementById('saveModal').classList.remove('active');
+        });
+
+        document.getElementById('copyDataBtn').addEventListener('click', () => {
+            const textarea = document.getElementById('saveData');
+            textarea.select();
+            document.execCommand('copy');
+            alert('クリップボードにコピーしました！');
+        });
+
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            document.getElementById('loadModal').classList.add('active');
+        });
+
+        document.getElementById('closeLoadModal').addEventListener('click', () => {
+            document.getElementById('loadModal').classList.remove('active');
+        });
+
+        document.getElementById('loadDataBtn').addEventListener('click', () => {
+            try {
+                const data = document.getElementById('loadData').value;
+                const loadedFrames = JSON.parse(data);
+                frames = loadedFrames;
+                currentFrameIndex = 0;
+                history = [];
+                historyIndex = -1;
+                updateFrameList();
+                draw();
+                document.getElementById('loadModal').classList.remove('active');
+                document.getElementById('loadData').value = '';
+                alert('プレイを読み込みました！');
+            } catch (e) {
+                alert('データの読み込みに失敗しました。正しいJSON形式か確認してください。');
+            }
+        });
+
+        // Export
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `korfball-play-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        // Player list
+        function updatePlayerList() {
+            const frame = frames[currentFrameIndex];
+            const teamAList = document.getElementById('teamAPlayers');
+            const teamBList = document.getElementById('teamBPlayers');
+            
+            teamAList.innerHTML = '';
+            teamBList.innerHTML = '';
+
+            frame.players.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                
+                const icon = document.createElement('div');
+                icon.className = `player-icon ${player.gender === 'boy' ? 'circle' : 'triangle'}`;
+                icon.style.background = player.color;
+                if (player.gender === 'boy') {
+                    icon.textContent = player.number;
+                }
+                
+                const info = document.createElement('span');
+                info.textContent = `#${player.number} ${player.gender === 'boy' ? '男' : '女'} ${player.onCourt ? '(コート内)' : '(交代)'}`;
+                
+                item.appendChild(icon);
+                item.appendChild(info);
+                
+                if (player.team === 'A') {
+                    teamAList.appendChild(item);
+                } else {
+                    teamBList.appendChild(item);
+                }
+            });
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseleave', handleMouseUp);
+
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            handleMouseDown(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            handleMouseMove(mouseEvent);
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleMouseUp(e);
+        });
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        updateFrameList();
+        updatePlayerList();
+        saveToHistory();
+    </script>
+</body>
+</html>
