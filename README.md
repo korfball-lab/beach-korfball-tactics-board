@@ -52,6 +52,11 @@ Based on official IKF Beach Korfball rules:
 
 MIT License
 
+## 👤 Author
+
+**Hajime Shinohara**  
+📧 shinohara@korfball.jp
+
 ## 🔗 Links
 
 - [Japan Korfball Association](https://korfball.jp)
