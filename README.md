@@ -2,6 +2,9 @@
 
 A mobile-friendly tactical board for beach korfball coaches and players.
 
+[https://korfball-lab.github.io/beach-korfball-tactics-board/](https://korfball-lab.github.io/beach-korfball-tactics-board/)
+
+
 ## 🎯 Features
 
 - **Drag & Drop**: Move players and ball by dragging
