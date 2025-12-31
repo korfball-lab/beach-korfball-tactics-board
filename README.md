@@ -2,23 +2,27 @@
 
 A mobile-friendly tactical board for beach korfball coaches and players.
 
-[https://korfball-lab.github.io/beach-korfball-tactics-board/](https://korfball-lab.github.io/beach-korfball-tactics-board/)
+## 🌐 Demo
 
+[https://korfball-lab.github.io/beach-korfball-tactics-board/](https://korfball-lab.github.io/beach-korfball-tactics-board/)
 
 ## 🎯 Features
 
 - **Drag & Drop**: Move players and ball by dragging
 - **Freehand Drawing**: Draw plays, arrows, and annotations
-- **Color Options**: 5 colors (black, red, blue, green, white)
+- **Frame Animation**: Create multi-frame play sequences
+- **Playback**: Auto-play animations with adjustable speed
+- **Color Options**: 6 colors (black, red, blue, green, orange, white)
 - **Eraser**: Remove drawings easily
 - **Undo/Redo**: Up to 50 steps of history
 - **Save/Load**: Export and import plays as JSON
-- **PNG Export**: Save current view as image
+- **PNG Export**: Save current frame as image
 - **Double-tap**: Edit player numbers
 
 ## 📱 Mobile Optimized
 
 - Touch-friendly interface
+- Simplified UI with minimal bottom bar
 - Safe area support (iPhone notch, etc.)
 - High DPI display support
 - No pinch-zoom interference
@@ -44,11 +48,20 @@ Based on official IKF Beach Korfball rules:
 - 🔴 Red = Team A
 - 🔵 Blue = Team B
 
+## 🎬 Frame Animation
+
+1. Open Settings menu (☰)
+2. Turn ON "Show Frame Controls" toggle
+3. Tap **＋** to add a new frame
+4. Move players to next position
+5. Repeat for each step of the play
+6. Tap **▶️ Play Animation** to watch
+
 ## 🚀 Usage
 
 1. Open in browser (works offline after first load)
-2. Select tool: **Select** / **Draw** / **Erase**
-3. Tap **☰** for menu (save, load, export, settings)
+2. Select tool: **MOVE** / **DRAW** / **ERASE**
+3. Tap **☰** for settings (colors, animation, save, export)
 4. Double-tap player to change number
 
 ## 📄 License
@@ -66,5 +79,3 @@ MIT License
 - [IKF Beach Korfball Rules](https://korfball.sport)
 
 ---
-
-Made with ❤️ for the korfball community
