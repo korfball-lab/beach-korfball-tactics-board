@@ -1,10 +1,10 @@
-# 🏐 Beach Korfball Tactics Board
+# ⚽ Indoor Korfball Tactics Board (Half Court)
 
-A mobile-friendly tactical board for beach korfball coaches and players.
+A mobile-friendly tactical board for indoor korfball coaches and players, featuring frame-by-frame animation.
 
 ## 🌐 Demo
 
-[https://korfball-lab.github.io/beach-korfball-tactics-board/](https://korfball-lab.github.io/beach-korfball-tactics-board/)
+[https://korfball-lab.github.io/indoor-korfball-tactics-board/](https://korfball-lab.github.io/indoor-korfball-tactics-board/)
 
 ## 🎯 Features
 
@@ -23,30 +23,29 @@ A mobile-friendly tactical board for beach korfball coaches and players.
 
 - Touch-friendly interface
 - Simplified UI with minimal bottom bar
+- Frame controls toggle ON/OFF
 - Safe area support (iPhone notch, etc.)
 - High DPI display support
 - No pinch-zoom interference
 
-## 🏖️ Court Specifications
+## 🏟️ Court Specifications
 
-Based on official IKF Beach Korfball rules:
+Based on official IKF Indoor Korfball rules (half court view):
 
 | Element | Specification |
 |---------|---------------|
-| Court Size | 20m × 10m |
-| Korf Position | 4m from each end line |
-| Free Shot Line | 7m (dashed) |
-| 2-Point Corner | 3m diagonal |
-| Center Line | Dashed |
+| Half Court Size | 20m × 20m |
+| Korf Position | 6.67m from end line, center |
+| Penalty Area | 2.5m radius (stadium shape) |
+| Free Pass Circle | 2.5m radius from penalty spot |
 
 ## 👥 Players
 
-- **16 players total** (8 per team)
-- **4 on court** + **4 substitutes** per team
+- **8 players** (half court: 4 attack + 4 defense)
 - ⭕ Circle = Male player
 - ⬜ Square = Female player
-- 🔴 Red = Team A
-- 🔵 Blue = Team B
+- 🔴 Red = Attack zone
+- 🔵 Blue = Defense zone
 
 ## 🎬 Frame Animation
 
@@ -56,6 +55,15 @@ Based on official IKF Beach Korfball rules:
 4. Move players to next position
 5. Repeat for each step of the play
 6. Tap **▶️ Play Animation** to watch
+
+### Frame Controls
+
+| Button | Action |
+|--------|--------|
+| ◀ | Previous frame |
+| ▶ | Next frame |
+| ＋ | Add new frame (copy current) |
+| 🗑 | Delete current frame |
 
 ## 🚀 Usage
 
@@ -76,6 +84,6 @@ MIT License
 ## 🔗 Links
 
 - [Japan Korfball Association](https://korfball.jp)
-- [IKF Beach Korfball Rules](https://korfball.sport)
+- [IKF Korfball Rules](https://korfball.sport)
 
 ---
